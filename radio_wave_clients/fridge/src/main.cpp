@@ -1,20 +1,8 @@
-
-/** RF24Mesh_Example.ino by TMRh20
-
-   This example sketch shows how to manually configure a node via RF24Mesh, and send data to the
-   master node.
-   The nodes will refresh their network address as soon as a single write fails. This allows the
-   nodes to change position in relation to each other and the master node.
-*/
-
-
 #include "RF24.h"
 #include "RF24Network.h"
 #include "RF24Mesh.h"
 #include <SPI.h>
-//#include <printf.h>
 
-/**** Configure the nrf24l01 CE and CS pins ****/
 #if defined(LEO)
 RF24 radio(7, 8);
 #else
@@ -23,47 +11,87 @@ RF24 radio(9, 10);
 RF24Network network(radio);
 RF24Mesh mesh(radio, network);
 
-/**
-   User Configuration: nodeID - A unique identifier for each radio. Allows addressing
-   to change dynamically with physical changes to the mesh.
-
-   In this example, configuration takes place below, prior to uploading the sketch to the device
-   A unique value from 1-255 must be configured for each node.
-   This will be stored in EEPROM on AVR devices, so remains persistent between further uploads, loss of power, etc.
-
- **/
 #define nodeID 33
 
-int led = 7;
+int led = 8;
 uint32_t displayTimer = 0;
 
 struct payload_t {
   unsigned long value;
 };
 
+/**
+  SET UP TIMER VAR FOR FOG MACHINE 
+**/
+
+const int fogPin = 7;
+bool fogIsOn = true;
+
+int fogTimeOn = 1000 * 60 * 1.5;
+int fogTimeOff = 1000 * 60 * 3;
+
+elapsedMillis sinceFogOn;
+elapsedMillis sinceFogOff;
+
+
+void fogOn() {
+  fogIsOn = true;
+  digitalWrite(fogPin, HIGH);
+  Serial.println("FOG IS ON");
+}
+
+void fogOff() {
+  fogIsOn = false;
+  digitalWrite(fogPin, LOW);
+  Serial.println("FOG IS OFF");
+}
+
 void setup() {
   Serial.begin(115200);
   delay(5000);
-  //printf_begin();
-  // Set the nodeID manually
+
   mesh.setNodeID(nodeID);
-  // Connect to the mesh
   Serial.println(F("Connecting to the mesh..."));
-  mesh.begin();
-  pinMode(led, OUTPUT);  
+  
+  mesh.begin(
+    MESH_DEFAULT_CHANNEL,     // channel
+    RF24_1MBPS,               // data_rate
+    1000*5                    // timeout
+  );
+
+
+  Serial.println("LED PIN");  
+  pinMode(led, OUTPUT);
+  pinMode(fogPin, OUTPUT);
+
+  fogOn();
+
+  sinceFogOn = 0;
+  sinceFogOff = 0;
 
 }
 
-
-
 void loop() {
+  
+  if (!fogIsOn && sinceFogOn >= fogTimeOff) {
+   fogOn();
+   sinceFogOff = 0;
+   sinceFogOn = 0;
+   Serial.println("Fog On for 1.5 minutes");  
+  }
+
+  if (fogIsOn && sinceFogOff >= fogTimeOn) {
+    fogOff();
+    sinceFogOn = 0;
+    sinceFogOff = 0;
+    Serial.println("Fog off for 3 minutes");
+  }
 
   mesh.update();
 
   // Send to the master node every second
   if (millis() - displayTimer >= 1000) {
     displayTimer = millis();
-
     // Send an 'M' type message containing the current millis()
     if (!mesh.write(&displayTimer, 'M', sizeof(displayTimer))) {
 
@@ -75,10 +103,9 @@ void loop() {
       } else {
         Serial.println("Send fail, Test OK");
       }
+    } else {
+      Serial.print("Send OK: "); Serial.println(displayTimer);
     }
-     // else {
-      // Serial.print("Send OK: "); Serial.println(displayTimer);
-    // }
   }
 
   while (network.available()) {
@@ -95,9 +122,5 @@ void loop() {
       digitalWrite(led, HIGH);
     }
   }
+
 }
-
-
-
-
-
