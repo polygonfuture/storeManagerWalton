@@ -20,6 +20,8 @@ boolean isConnected = false;
 color okBgColor;
 color disabledBgColor = color(0, 100, 0);
 
+int Extinguisher = 0;
+
 Client c;
 
 //void draw() {
@@ -120,7 +122,7 @@ void updateUI(){
       String controllerName = thing.name();
       if(json.hasKey(controllerName)){
         boolean alive = json.getJSONObject(controllerName).getBoolean("alive");
-        float lastValue = json.getJSONObject(controllerName).getFloat("lastValue");
+        int lastValue = json.getJSONObject(controllerName).getInt("lastValue");
         setLock(controllerName,alive);
         // println("Server says that "+ controllerName + " alive status is: " + alive);
         println("Server says that "+ controllerName + " last value status is: " + lastValue);
@@ -240,7 +242,7 @@ void controlEvent(CallbackEvent theEvent) {
     switch(theEvent.getAction()) {
       case(ControlP5.ACTION_RELEASED): 
       if(c.active()){
-        float value = -1.0+theEvent.getController().getValue();
+        int value = int(-1.0+theEvent.getController().getValue());
         String s="{\"TIRE\":"+value+"}\r\n";
         c.write(s);
       //   delay(200);
@@ -257,8 +259,8 @@ void controlEvent(CallbackEvent theEvent) {
   switch(theEvent.getAction()) {
     case(ControlP5.ACTION_RELEASED): 
     if(c.active()){
-      float value = -1.0+theEvent.getController().getValue();
-      String s="{\"EXTINGUISHER\":"+value+"}\r\n";
+      int value = int(-1+theEvent.getController().getValue());
+      String s="{\"EXTINGUISHER\":"+int(value)+"}\r\n";
       c.write(s);
     //   delay(200);
     //   if (c.available() > 0) { // If there's incoming data from the client...
@@ -354,7 +356,7 @@ public void Fridge(int value) {
 //    println("Extinguisher is Off");
 //   }   
 
-}
+//}
 
 public void Camera(int value) {
   // presumably this takes a boolean
@@ -393,4 +395,3 @@ void disconnectEvent(Client someClient) {
     cp5.getController("Server").setValue(0.0);
   }
 }
-
