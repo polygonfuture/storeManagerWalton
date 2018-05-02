@@ -2,7 +2,6 @@
 #include "RF24Network.h"
 #include "RF24Mesh.h"
 #include <SPI.h>
-#include <elapsedMillis.h>
 
 #if defined(LEO)
 RF24 radio(7, 8);
@@ -28,28 +27,12 @@ struct payload_t {
 const int extinguisherPin = 7;
 bool extinguisherIsOn = true;
 
-int speedPin = 3;
-int dirPin = 4;
-int sleepPin = 2;
-int breathSpeed = 0;
-
-//  [FORWARD / BRAKE at speed PWM %] dirPin LOW && PWM %
-//  [REVERSE / BRAKE at speed PWM%] dirPin HIGH && PWM %
-
-
 int extinguisherTimeOn = 1000 * 15;
 int extinguisherTimeOff = 1000 * 30;
 
 elapsedMillis sinceExtinguisherOn;
 elapsedMillis sinceExtinguisherOff;
 
-
-void breath(int breathSpeed) {
-  digitalWrite(dirPin, HIGH);
-  analogWrite(speedPin, breathSpeed);
-  Serial.println("Breathing at");
-  Serial.print(breathSpeed);
-}
 
 void extinguisherOn() {
   extinguisherIsOn = true;
@@ -79,13 +62,8 @@ void setup() {
   Serial.println("LED PIN");  
   pinMode(led, OUTPUT);
   pinMode(extinguisherPin, OUTPUT);
-  
-  pinMode(speedPin, OUTPUT);
-  pinMode(dirPin, OUTPUT);
-  pinMode(sleepPin, OUTPUT);
-  digitalWrite(sleepPin, HIGH);  
 
- // extinguisherOn();
+  extinguisherOn();
 
   sinceExtinguisherOn = 0;
   sinceExtinguisherOff = 0;
@@ -94,19 +72,19 @@ void setup() {
 
 void loop() {
   
-//  if (!extinguisherIsOn && sinceExtinguisherOn >= extinguisherTimeOff) {
-//   extinguisherOn();
-//   sinceExtinguisherOff = 0;
-//   sinceExtinguisherOn = 0;
-//   Serial.println("Extinguisher On for 15 seconds");  
-//  }
+  if (!extinguisherIsOn && sinceExtinguisherOn >= extinguisherTimeOff) {
+   extinguisherOn();
+   sinceExtinguisherOff = 0;
+   sinceExtinguisherOn = 0;
+   Serial.println("Extinguisher On for 15 seconds");  
+  }
 
-//  if (extinguisherIsOn && sinceExtinguisherOff >= extinguisherTimeOn) {
-  //  extinguisherOff();
-  //  sinceExtinguisherOn = 0;
-  //  sinceExtinguisherOff = 0;
-  //  Serial.println("Extinguisher off for 30 seconds");
- // }
+  if (extinguisherIsOn && sinceExtinguisherOff >= extinguisherTimeOn) {
+    extinguisherOff();
+    sinceExtinguisherOn = 0;
+    sinceExtinguisherOff = 0;
+    Serial.println("Extinguisher off for 30 seconds");
+  }
 
   mesh.update();
 
@@ -135,9 +113,6 @@ void loop() {
     network.read(header, &payload, sizeof(payload));
     Serial.print("Received value #");
     Serial.println(payload.value);
-
-    breath(payload.value);
-
     if (payload.value == 0) {
       Serial.println("LOOOWWW");
       digitalWrite(led, LOW);

@@ -8,7 +8,7 @@ Slider tire;
 Toggle tireSwitch;
 Toggle cart;
 Toggle fridge;
-Toggle extinguisher;
+Slider extinguisher;
 Toggle camera;
 Toggle heart;
 
@@ -90,9 +90,10 @@ void createUI(){
    .setSize(50,20)
      ;
      
-  extinguisher = cp5.addToggle("Extinguisher");
+  extinguisher = cp5.addSlider("Extinguisher");
    extinguisher.setPosition(190,320)
    .setSize(50,20)
+  .setRange(0, 256)
      ;
      
   camera = cp5.addToggle("Camera");
