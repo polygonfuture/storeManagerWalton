@@ -253,23 +253,6 @@ void controlEvent(CallbackEvent theEvent) {
       break;
     }
   }
-  else if (theEvent.getController().equals(extinguisher)) {
-  switch(theEvent.getAction()) {
-    case(ControlP5.ACTION_RELEASED): 
-    if(c.active()){
-      float value = -1.0+theEvent.getController().getValue();
-      String s="{\"EXTINGUISHER\":"+value+"}\r\n";
-      c.write(s);
-    //   delay(200);
-    //   if (c.available() > 0) { // If there's incoming data from the client...
-    //     String response = c.readString();
-    //     // println(response);
-    //     // println(response == "OK\r");
-    //   }
-    }
-    break;
-  }
-  }
 }
 // example unique-name function, dunno if you need the public or not
 public void Server(int value) {
@@ -343,16 +326,16 @@ public void Fridge(int value) {
 
 }
 
-// public void Extinguisher(int value) {
-//   // presumably this takes a boolean
-//   // state.put(Thing.EXTINGUISHER, byte(value));
+public void Extinguisher(int value) {
+  // presumably this takes a boolean
+  // state.put(Thing.EXTINGUISHER, byte(value));
   
-//   if(boolean(value)) {
-//    println("Extinguisher is On");
-//   }
-//   else {
-//    println("Extinguisher is Off");
-//   }   
+  if(boolean(value)) {
+   println("Extinguisher is On");
+  }
+  else {
+   println("Extinguisher is Off");
+  }   
 
 }
 
@@ -393,4 +376,3 @@ void disconnectEvent(Client someClient) {
     cp5.getController("Server").setValue(0.0);
   }
 }
-
