@@ -1,0 +1,11 @@
+{"CAMERA":{"alive":false,"lastValue":0.0},"CART":{"alive":false,"lastValue":0.0},"EXTINGUISHER":{"alive":true,"lastValue":173.0},"FRIDGE":{"alive":false,"lastValue":0.0},"HEART":{"alive":false,"lastValue":0.0},"TIRE":{"alive":false,"lastValue":0.0}}
+Stacktrace below:
+java.lang.RuntimeException: A JSONObject text must begin with '{'
+	at processing.data.JSONObject.<init>(JSONObject.java:242)
+	at processing.data.JSONObject.<init>(JSONObject.java:226)
+	at processing.core.PApplet.parseJSONObject(PApplet.java:6002)
+	at storeManager.updateUI(storeManager.java:141)
+	at storeManager.draw(storeManager.java:210)
+	at processing.core.PApplet.handleDraw(PApplet.java:2437)
+	at processing.awt.PSurfaceAWT$12.callDraw(PSurfaceAWT.java:1557)
+	at processing.core.PSurfaceNone$AnimationThread.run(PSurfaceNone.java:316)

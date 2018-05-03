@@ -74,38 +74,38 @@ void createUI(){
 
   tireSwitch = cp5.addToggle("TireSwitch");
    tireSwitch.setPosition(190,80)
-   .setSize(50,20);
+   .setSize(100,40);
      
 
   tire = cp5.addSlider("Tire");
    tire.setPosition(190,160)
-   .setSize(50,20)
+   .setSize(100,40)
    .setRange(0, 100);
      
   cart = cp5.addToggle("Cart");
    cart.setPosition(380,160)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   fridge = cp5.addToggle("Fridge");
    fridge.setPosition(570,160)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   extinguisher = cp5.addSlider("Extinguisher");
    extinguisher.setPosition(190,320)
-   .setSize(50,20)
-  .setRange(0, 256)
+   .setSize(100,40)
+  .setRange(-10, 300)
      ;
      
   camera = cp5.addToggle("Camera");
    camera.setPosition(380,320)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   heart = cp5.addToggle("Heart");
    heart.setPosition(570,320)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   okBgColor = color(cp5.getController("Heart").getColor().getBackground());
@@ -117,16 +117,25 @@ void updateUI(){
   delay(100);
   if (c.available() > 0) {
     String d = c.readString();
-    JSONObject json = parseJSONObject(d);
-    for(Thing thing : state.keySet()) {
-      String controllerName = thing.name();
-      if(json.hasKey(controllerName)){
-        boolean alive = json.getJSONObject(controllerName).getBoolean("alive");
-        int lastValue = json.getJSONObject(controllerName).getInt("lastValue");
-        setLock(controllerName,alive);
-        // println("Server says that "+ controllerName + " alive status is: " + alive);
-        println("Server says that "+ controllerName + " last value status is: " + lastValue);
+    try {
+      d = d.replace("\r", "");
+      d = d.replace("\n", "");
+      JSONObject json = parseJSONObject(d);
+      for(Thing thing : state.keySet()) {
+        String controllerName = thing.name();
+        if(json.hasKey(controllerName)){
+          boolean alive = json.getJSONObject(controllerName).getBoolean("alive");
+          int lastValue = json.getJSONObject(controllerName).getInt("lastValue");
+          setLock(controllerName,alive);
+          // println("Server says that "+ controllerName + " alive status is: " + alive);
+          println("Server says that "+ controllerName + " last value status is: " + lastValue);
+        }
       }
+    } catch (java.lang.RuntimeException e) {
+      println("Error receiving response from server.");
+      println(d);
+      println("Stacktrace below:");
+      e.printStackTrace();
     }
   }
 }
@@ -259,7 +268,16 @@ void controlEvent(CallbackEvent theEvent) {
   switch(theEvent.getAction()) {
     case(ControlP5.ACTION_RELEASED): 
     if(c.active()){
-      int value = int(-1+theEvent.getController().getValue());
+      int value = int(theEvent.getController().getValue());
+      
+      if (value<=0) {
+        value = 0;
+      }
+      
+      if (value>=256) {
+        value = 256;
+      }
+      
       String s="{\"EXTINGUISHER\":"+int(value)+"}\r\n";
       c.write(s);
     //   delay(200);
