@@ -24,7 +24,7 @@ int Extinguisher = 0;
 
 Client c;
 
-//void draw() {
+//void draw() {c
 //  if (c.available() > 0) { // If there's incoming data from the client...
 //    data = c.readString(); // ...then grab it and print it
 //    println(data);
@@ -289,6 +289,37 @@ void controlEvent(CallbackEvent theEvent) {
     }
     break;
   }
+  }
+    else if (theEvent.getController().equals(cart)) {
+    switch(theEvent.getAction()) {
+      case(ControlP5.ACTION_RELEASED): 
+      if(c.active()){
+        String s="{\"CART\":"+theEvent.getController().getValue()+"}\r\n";
+        c.write(s);
+        delay(300);
+        if (c.available() > 0) { // If there's incoming data from the client...
+          String response = c.readString();
+          // println("");
+          // println("");
+          // println("RREEEAAADDDDHHHEEERRREE");
+          // println(response);
+          // println(response.charAt(0) == '1');
+          // println("SSTTTOPPPP RREEEAAADDDDHHHEEERRREE");
+          // println("");
+          // println("");
+          // if(response.charAt(0) == '1'){
+            // fridge.setValue(1.0);
+          // }
+          if(response.charAt(0) == '0'){
+            cart.setValue(1.0-theEvent.getController().getValue());
+          }
+        }
+        else{
+            cart.setValue(1.0-theEvent.getController().getValue());
+        }
+      }
+      break;
+    }
   }
 }
 // example unique-name function, dunno if you need the public or not
