@@ -11,9 +11,10 @@ RF24 radio(9, 10);
 RF24Network network(radio);
 RF24Mesh mesh(radio, network);
 
-#define nodeID 55
+#define nodeID 22
 
 int motorPin = 3;
+//int led = 13;
 uint32_t displayTimer = 0;
 
 struct payload_t {
@@ -63,6 +64,7 @@ void setup() {
   Serial.println("Motor PIN");  
   pinMode(motorPin, OUTPUT);
   pinMode(fogPin, OUTPUT);
+  
 
 //  fogOn();
 

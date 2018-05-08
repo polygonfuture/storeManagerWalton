@@ -20,9 +20,11 @@ boolean isConnected = false;
 color okBgColor;
 color disabledBgColor = color(0, 100, 0);
 
+int Extinguisher = 0;
+
 Client c;
 
-//void draw() {
+//void draw() {c
 //  if (c.available() > 0) { // If there's incoming data from the client...
 //    data = c.readString(); // ...then grab it and print it
 //    println(data);
@@ -72,38 +74,38 @@ void createUI(){
 
   tireSwitch = cp5.addToggle("TireSwitch");
    tireSwitch.setPosition(190,80)
-   .setSize(50,20);
+   .setSize(100,40);
      
 
   tire = cp5.addSlider("Tire");
    tire.setPosition(190,160)
-   .setSize(50,20)
+   .setSize(100,40)
    .setRange(0, 100);
      
   cart = cp5.addToggle("Cart");
    cart.setPosition(380,160)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   fridge = cp5.addToggle("Fridge");
    fridge.setPosition(570,160)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   extinguisher = cp5.addSlider("Extinguisher");
    extinguisher.setPosition(190,320)
-   .setSize(50,20)
-  .setRange(0, 256)
+   .setSize(100,40)
+  .setRange(-10, 300)
      ;
      
   camera = cp5.addToggle("Camera");
    camera.setPosition(380,320)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   heart = cp5.addToggle("Heart");
    heart.setPosition(570,320)
-   .setSize(50,20)
+   .setSize(100,40)
      ;
      
   okBgColor = color(cp5.getController("Heart").getColor().getBackground());
@@ -115,16 +117,25 @@ void updateUI(){
   delay(100);
   if (c.available() > 0) {
     String d = c.readString();
-    JSONObject json = parseJSONObject(d);
-    for(Thing thing : state.keySet()) {
-      String controllerName = thing.name();
-      if(json.hasKey(controllerName)){
-        boolean alive = json.getJSONObject(controllerName).getBoolean("alive");
-        float lastValue = json.getJSONObject(controllerName).getFloat("lastValue");
-        setLock(controllerName,alive);
-        // println("Server says that "+ controllerName + " alive status is: " + alive);
-        println("Server says that "+ controllerName + " last value status is: " + lastValue);
+    try {
+      d = d.replace("\r", "");
+      d = d.replace("\n", "");
+      JSONObject json = parseJSONObject(d);
+      for(Thing thing : state.keySet()) {
+        String controllerName = thing.name();
+        if(json.hasKey(controllerName)){
+          boolean alive = json.getJSONObject(controllerName).getBoolean("alive");
+          int lastValue = json.getJSONObject(controllerName).getInt("lastValue");
+          setLock(controllerName,alive);
+          // println("Server says that "+ controllerName + " alive status is: " + alive);
+          println("Server says that "+ controllerName + " last value status is: " + lastValue);
+        }
       }
+    } catch (java.lang.RuntimeException e) {
+      println("Error receiving response from server.");
+      println(d);
+      println("Stacktrace below:");
+      e.printStackTrace();
     }
   }
 }
@@ -240,7 +251,7 @@ void controlEvent(CallbackEvent theEvent) {
     switch(theEvent.getAction()) {
       case(ControlP5.ACTION_RELEASED): 
       if(c.active()){
-        float value = -1.0+theEvent.getController().getValue();
+        int value = int(-1.0+theEvent.getController().getValue());
         String s="{\"TIRE\":"+value+"}\r\n";
         c.write(s);
       //   delay(200);
@@ -249,6 +260,63 @@ void controlEvent(CallbackEvent theEvent) {
       //     // println(response);
       //     // println(response == "OK\r");
       //   }
+      }
+      break;
+    }
+  }
+  else if (theEvent.getController().equals(extinguisher)) {
+  switch(theEvent.getAction()) {
+    case(ControlP5.ACTION_RELEASED): 
+    if(c.active()){
+      int value = int(theEvent.getController().getValue());
+      
+      if (value<=0) {
+        value = 0;
+      }
+      
+      if (value>=256) {
+        value = 256;
+      }
+      
+      String s="{\"EXTINGUISHER\":"+int(value)+"}\r\n";
+      c.write(s);
+    //   delay(200);
+    //   if (c.available() > 0) { // If there's incoming data from the client...
+    //     String response = c.readString();
+    //     // println(response);
+    //     // println(response == "OK\r");
+    //   }
+    }
+    break;
+  }
+  }
+    else if (theEvent.getController().equals(cart)) {
+    switch(theEvent.getAction()) {
+      case(ControlP5.ACTION_RELEASED): 
+      if(c.active()){
+        String s="{\"CART\":"+theEvent.getController().getValue()+"}\r\n";
+        c.write(s);
+        delay(300);
+        if (c.available() > 0) { // If there's incoming data from the client...
+          String response = c.readString();
+          // println("");
+          // println("");
+          // println("RREEEAAADDDDHHHEEERRREE");
+          // println(response);
+          // println(response.charAt(0) == '1');
+          // println("SSTTTOPPPP RREEEAAADDDDHHHEEERRREE");
+          // println("");
+          // println("");
+          // if(response.charAt(0) == '1'){
+            // fridge.setValue(1.0);
+          // }
+          if(response.charAt(0) == '0'){
+            cart.setValue(1.0-theEvent.getController().getValue());
+          }
+        }
+        else{
+            cart.setValue(1.0-theEvent.getController().getValue());
+        }
       }
       break;
     }
@@ -326,18 +394,18 @@ public void Fridge(int value) {
 
 }
 
-public void Extinguisher(int value) {
-  // presumably this takes a boolean
-  // state.put(Thing.EXTINGUISHER, byte(value));
+// public void Extinguisher(int value) {
+//   // presumably this takes a boolean
+//   // state.put(Thing.EXTINGUISHER, byte(value));
   
-  if(boolean(value)) {
-   println("Extinguisher is On");
-  }
-  else {
-   println("Extinguisher is Off");
-  }   
+//   if(boolean(value)) {
+//    println("Extinguisher is On");
+//   }
+//   else {
+//    println("Extinguisher is Off");
+//   }   
 
-}
+//}
 
 public void Camera(int value) {
   // presumably this takes a boolean

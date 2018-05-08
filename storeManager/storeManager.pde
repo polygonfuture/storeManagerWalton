@@ -9,8 +9,9 @@ Toggle tireSwitch;
 Toggle cart;
 Toggle fridge;
 Slider extinguisher;
-Toggle camera;
-Toggle heart;
+Toggle extinguisherSwitch;
+Toggle all;
+Toggle timer;
 
 PrintWriter output;
 
@@ -21,6 +22,7 @@ color okBgColor;
 color disabledBgColor = color(0, 100, 0);
 
 int Extinguisher = 0;
+int Tire = 0;
 
 Client c;
 
@@ -33,7 +35,7 @@ Client c;
 
 enum Thing
 {
-  TIRE, CART, FRIDGE, EXTINGUISHER, CAMERA, HEART;
+  TIRE, CART, FRIDGE, EXTINGUISHER;
 }
 
 
@@ -58,8 +60,6 @@ void initializeState(){
   state.put(Thing.CART, byte(0));
   state.put(Thing.FRIDGE, byte(0));
   state.put(Thing.EXTINGUISHER, byte(0));
-  state.put(Thing.CAMERA, byte(0));
-  state.put(Thing.HEART, byte(0));
 
 }
 
@@ -68,47 +68,59 @@ void createUI(){
   cp5 = new ControlP5(this);
   
   server = cp5.addToggle("Server");
-   server.setPosition(380,80)
-   .setSize(50,20)
-   .setValue(c.active());
+   server.setPosition(650,30)
+   .setSize(100,40)
+   .setValue(c.active())
+    ;
+
 
   tireSwitch = cp5.addToggle("TireSwitch");
-   tireSwitch.setPosition(190,80)
-   .setSize(100,40);
-     
+   tireSwitch.setPosition(50,160) 
+   .setSize(80,80)
+    ;
 
   tire = cp5.addSlider("Tire");
-   tire.setPosition(190,160)
-   .setSize(100,40)
-   .setRange(0, 100);
-     
-  cart = cp5.addToggle("Cart");
-   cart.setPosition(380,160)
-   .setSize(100,40)
-     ;
-     
-  fridge = cp5.addToggle("Fridge");
-   fridge.setPosition(570,160)
-   .setSize(100,40)
+   tire.setPosition(50,280)
+   .setSize(80,160)
+   .setRange(-10, 150)
+   ;
+   
+   
+  extinguisherSwitch = cp5.addToggle("ExtinguisherSwitch");
+   extinguisherSwitch.setPosition(260,160)
+   .setSize(80,80)
      ;
      
   extinguisher = cp5.addSlider("Extinguisher");
-   extinguisher.setPosition(190,320)
-   .setSize(100,40)
-  .setRange(-10, 300)
+   extinguisher.setPosition(260,280)
+   .setSize(80,160)
+    .setRange(-10, 300)
      ;
      
-  camera = cp5.addToggle("Camera");
-   camera.setPosition(380,320)
-   .setSize(100,40)
+  cart = cp5.addToggle("Cart");
+   cart.setPosition(470,240)
+   .setSize(80,200)
      ;
      
-  heart = cp5.addToggle("Heart");
-   heart.setPosition(570,320)
-   .setSize(100,40)
+  fridge = cp5.addToggle("Fridge");
+   fridge.setPosition(660,240)
+   .setSize(80,200)
      ;
      
-  okBgColor = color(cp5.getController("Heart").getColor().getBackground());
+  all = cp5.addToggle("ALL ON");
+   all.setPosition(50,30)
+   .setSize(160,40)
+     ;
+     
+  timer = cp5.addToggle("TIMER");
+   timer.setPosition(300,30)
+   .setSize(160,40)
+     ;
+     
+
+     
+     
+  okBgColor = color(cp5.getController("Fridge").getColor().getBackground());
 }
 
 
@@ -142,7 +154,8 @@ void updateUI(){
 
 
 void setup() {
-  size(760,480);
+  fullScreen();
+  //size(800,480);
   smooth();
   
 
@@ -169,8 +182,6 @@ void setLock(String controllerName, boolean theValue) {
     case("CART"):setLock(cart, theValue);break;
     case("FRIDGE"):setLock(fridge, theValue);break;
     case("EXTINGUISHER"):setLock(extinguisher, theValue);break;
-    case("CAMERA"):setLock(camera, theValue);break;
-    case("HEART"):setLock(heart, theValue);break;
   }
 
 }
@@ -217,8 +228,8 @@ void controlEvent(CallbackEvent theEvent) {
           // println("SSTTTOPPPP RREEEAAADDDDHHHEEERRREE");
           // println("");
           // println("");
-          // if(response.charAt(0) == '1'){
-            // fridge.setValue(1.0);
+          //if(response.charAt(0) == '1'){
+          //  // fridge.setValue(1.0);
           // }
           if(response.charAt(0) == '0'){
             fridge.setValue(1.0-theEvent.getController().getValue());
@@ -280,15 +291,26 @@ void controlEvent(CallbackEvent theEvent) {
       
       String s="{\"EXTINGUISHER\":"+int(value)+"}\r\n";
       c.write(s);
+      delay(300);
+     
     //   delay(200);
     //   if (c.available() > 0) { // If there's incoming data from the client...
     //     String response = c.readString();
     //     // println(response);
     //     // println(response == "OK\r");
     //   }
-    }
+     if (c.available() > 0) { // If there's incoming data from the client...
+        String response = c.readString();
+        if(response.charAt(0) == '0'){
+            extinguisher.setValue(theEvent.getController().getValue());
+            }
+        }
+        else{
+            extinguisher.setValue(theEvent.getController().getValue());
+         }
+      }
     break;
-  }
+    }
   }
     else if (theEvent.getController().equals(cart)) {
     switch(theEvent.getAction()) {
@@ -394,44 +416,35 @@ public void Fridge(int value) {
 
 }
 
-// public void Extinguisher(int value) {
-//   // presumably this takes a boolean
-//   // state.put(Thing.EXTINGUISHER, byte(value));
-  
-//   if(boolean(value)) {
-//    println("Extinguisher is On");
-//   }
-//   else {
-//    println("Extinguisher is Off");
-//   }   
-
-//}
-
-public void Camera(int value) {
+public void TireSwitch(int value) {
   // presumably this takes a boolean
-  // state.put(Thing.CAMERA, byte(value));
+  // state.put(Thing.FRIDGE, byte(value));
   
   if(boolean(value)) {
-   println("Camera is On");
+   println("tire is On");
   }
   else {
-   println("Camera is Off");
+   println("tire is Off");
   }   
 
 }
 
-public void Heart(int value) {
+public void ExtinguisherSwitch(int value) {
   // presumably this takes a boolean
-  // state.put(Thing.HEART, byte(value));
+  // state.put(Thing.FRIDGE, byte(value));
   
   if(boolean(value)) {
-   println("Heart is On");
+   println("extinguisher is On");
   }
   else {
-   println("Heart is Off");
+   println("extinguisher is Off");
   }   
 
 }
+
+
+
+
 
 
 
