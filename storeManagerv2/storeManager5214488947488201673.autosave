@@ -16,8 +16,8 @@ Toggle timer;
 boolean TIMER_MODE = false;
 boolean everythingIsOn = false;
 
-int STAY_OFF_FOR_TEN_MINUTES = 30 * 1000;//60 * 10;
-int STAY_ON_FOR_ONE_MINUTE = 20 * 1000;//60;
+int STAY_OFF_FOR_TEN_MINUTES = 60 * 1000;//60 * 10;
+int STAY_ON_FOR_ONE_MINUTE =  60 * 1000;//60;
 
 PrintWriter output;
 
